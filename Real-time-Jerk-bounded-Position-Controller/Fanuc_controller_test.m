@@ -23,9 +23,9 @@ clear all;
 
 addpath(genpath('lib'));
 %% start experimentor
-tg=slrealtime('fanuc_speedgoat');
-load(tg, 'icl_control');
-start(tg);
+% tg=slrealtime('fanuc_speedgoat');
+% load(tg, 'icl_control');
+% start(tg);
 
 comm=SLRTComm;
 comm.timeout=15;
@@ -46,7 +46,8 @@ traj = [-2 0 0 0 0 0;
 traj_hz = 1;
 resample_hz = 5;
 ovr = 0.1;
-comm.drvJntTrajWait(traj, traj_hz, resample_hz, ovr, 1);
+% comm.drvJntTrajWait(traj, traj_hz, resample_hz, ovr, 1);
+comm.drvJntTraj(traj, traj_hz, resample_hz, ovr, 1);
 
 pause(1);
 resample_hz = 25;
@@ -69,10 +70,11 @@ new_traj = [-3 5 0 0 0 0;
             -1 2 0 0 0 0;
             0 1 0 0 0 0;
             0 0 0 0 0 0];
-comm.drvJntTrajWait(new_traj, traj_hz, resample_hz, ovr, 4);
+comm.drvJntTraj(new_traj, traj_hz, resample_hz, ovr, 4);
+%drvJntTrajWait
 
 [cur_q, cur_v] = comm.getRobData;
 
 comm.endSTMO;
 pause(0.5);
-stop(tg);
+% stop(tg);

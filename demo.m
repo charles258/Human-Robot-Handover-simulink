@@ -22,6 +22,7 @@
 
 % clear all;
 clc;
+clf;
 close all;
 ROBOT = 'LRMate200iD7L';
 MODE = 'HumanINTR';%'CamerINTR'; %'CamerINTR'; % HumanINTR for mouse control; HuRobINTR: perception using camera.W
@@ -30,10 +31,10 @@ enbSSA = 1; % 1: enable SSA. 0: disable SSA.
 tasks = load('task.txt')';  %should not transpose? or line 35 should use the first dim
 USE_GRIPPER = 0;
 USE_FTS = 0;
-Ts = 0.001;
-Tc = 0.008;
+% Ts = 0.001;
+% Tc = 0.008;
 load_dependencies;  %load relevent folder
-num_tasks = size(tasks, 2);
+num_tasks = size(tasks, 2); %size(tasks, 2)
 task_id = 0;
 % task_id_last = -1;
 bootup = true;
@@ -101,29 +102,16 @@ vel_t = 1000;
 % end
 % start(tg);
 
-% mdl = 'icl_control_sim';
-% in = Simulink.SimulationInput(mdl);
-% cmd = 1;
-% robotdata_cmd = 0;
-% in = in.setExternalInput([cmd, robotdata_cmd, VAJm, JntTraj, setRobotProperty ...
-%     , setHumanProperty, sw_SSA]);
-% msg_robdata = sim(in);
-% set_param(mdl, 'SimulationCommand', 'start');
-
-% ip = '192.168.7.5';
-% u1 = udp(ip,'RemotePort',8866,'LocalPort',1108);
-% fopen(u1);
 comm=SLRTComm;
-comm.ip = '127.0.0.1';    %127.0.0.1  192.168.7.5
-comm.timeout=20;
+comm.ip = '127.0.0.1';    %127.0.0.1 / 192.168.7.5
+comm.timeout=10;
 comm.startSTMO;
 pause(0.5);
 comm.setRobotProperty(robot.nlink,robot.DH,robot.cap,robot.base,robot.ssa_margin);
 comm.setHumanProperty(HuCap,pre_HuCap,vel_t);
 pause(0.1);
 comm.enableSSA(enbSSA);
-comm.drvJntTraj(ref_traj, traj_hz, resample_hz, 0.1, replan_cnt);
-[jpos, jvel, SSA_status, controller_status] = comm.getRobData;  %(msg_robdata)
+[jpos, jvel, SSA_status, controller_status] = comm.getRobData;
 draw_robot;
 pause(0.2);
 
@@ -221,13 +209,8 @@ while true
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Get current pos and replan feedback %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-%     comm.startSTMO;
-%     comm.setRobotProperty(robot.nlink,robot.DH,robot.cap,robot.base,robot.ssa_margin);
-%     comm.setHumanProperty(HuCap,pre_HuCap,vel_t);
-%     comm.enableSSA(enbSSA);
-%     comm.drvJntTraj(ref_traj, traj_hz, resample_hz, 0.1, replan_cnt);
     [jpos, jvel, ssa_replan_request, controller_replan] = comm.getRobData;
-
+    jpos'   %just to output jpos
     %%%%%%%%%%%%%%%%%
     % State Machine %
     %%%%%%%%%%%%%%%%%

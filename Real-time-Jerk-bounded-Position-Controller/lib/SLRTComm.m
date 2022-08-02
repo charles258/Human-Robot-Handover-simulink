@@ -31,7 +31,7 @@ classdef SLRTComm < handle
         timeout=60;
         SSA_replan_cnt=0;
         controller_status=0;
-        ip;
+        ip = '127.0.0.1';   %local host
     end
     
     methods
@@ -70,19 +70,10 @@ classdef SLRTComm < handle
             judp('send',8106,obj.ip,int8(0));
             judp('send',8106,obj.ip,int8(1));
       
-%             u2 = udp('192.168.7.5','LocalPort',25001);
-%             fopen(u2);
-%             msg = fread(u2,20,'char')';
-%             fclose(u2);
-%             delete(u2);
-%             msg = robot_data;
+            msg=judp('receive',25001,56,obj.timeout*1000);
+            msg=typecast(msg,'single');
+            msg=double(msg);
 
-%             msg=judp('receive',25001,56,obj.timeout*1000);
-%             msg=typecast(msg,'single');
-%             msg=double(msg);
-            msg = zeros(1, 14);
-%             load('robot_data_file.mat');
-%             msg = robodata;
             q_cur=msg(1:6);
             q_vel=msg(7:12);
             ssa=msg(13);
@@ -145,28 +136,28 @@ classdef SLRTComm < handle
             judp('send',8108,obj.ip,typecast(single([nlink,HuCap_s,HuCap_vel]),'int8'));
         end
         
-%         function [status,tskcnt] = drvJntTrajWait(obj,q,traj_hz,resample_hz,ovr,task_seq)
-%             K1 = 1/traj_hz/0.008/resample_hz;
-%             if(floor(K1) ~= K1)
-%                 disp("resample_hz not supported!");
-%                 status = 0;
-%                 tskcnt = task_seq;
-%                 return
-%             end
-%             % q: Nx6
-%             num_waypoints = size(q, 1);
-%             traj_q = zeros(1875, 6);
-%             traj_q(1:num_waypoints, :) = q(:, :);
-%             traj_q = reshape(traj_q.', 1,[]);
-%             
-%             judp('send',8104,'192.168.7.5',typecast(single([traj_q(:).',num_waypoints,traj_hz,resample_hz,ovr,task_seq]),'int8'));
-%             
-%             msg=judp('receive',25000,8,obj.timeout*1000);
-%             msg=typecast(msg,'single');
-%             msg=double(msg);
-%             status = logical(msg(1));
-%             tskcnt = task_seq;%double(msg(2)); % msg(2) = task count
-%         end
+        function [status,tskcnt] = drvJntTrajWait(obj,q,traj_hz,resample_hz,ovr,task_seq)
+            K1 = 1/traj_hz/0.008/resample_hz;
+            if(floor(K1) ~= K1)
+                disp("resample_hz not supported!");
+                status = 0;
+                tskcnt = task_seq;
+                return
+            end
+            % q: Nx6
+            num_waypoints = size(q, 1);
+            traj_q = zeros(1875, 6);
+            traj_q(1:num_waypoints, :) = q(:, :);
+            traj_q = reshape(traj_q.', 1,[]);
+            
+            judp('send',8104,obj.ip,typecast(single([traj_q(:).',num_waypoints,traj_hz,resample_hz,ovr,task_seq]),'int8'));
+            
+            msg=judp('receive',25000,8,obj.timeout*1000);
+            msg=typecast(msg,'single');
+            msg=double(msg);
+            status = logical(msg(1));
+            tskcnt = task_seq;%double(msg(2)); % msg(2) = task count
+        end
         
         function status = drvJntTraj(obj,q,traj_hz,resample_hz,ovr,task_seq)
             K1 = 1/traj_hz/0.008/resample_hz;
