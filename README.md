@@ -1,3 +1,6 @@
+#This repo is for simulink version(can run on one PC without SpeedGoat)
+    and the SLRT version is in "Human-Robot-Handover-SLRT.rar"
+
 # Human-Robot-Handover
 This repo implements the safe robot handover.
 
